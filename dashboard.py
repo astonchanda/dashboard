@@ -34,11 +34,19 @@ conn1 = mysql.connector.connect(
     ssl_ca=st.secrets["connections"]["gncz_dbms"]["ssl_ca"]
 )
 
-conn2 = st.connection("zambia_osp", type="sql", connect_args={
-    "ssl": {
-        "ca": st.secrets["connections"]["gncz_dbms"]["ssl_ca"],
-    }
-})
+conn2 = mysql.connector.connect(
+    host=st.secrets["connections"]["zambia_osp"]["host"],
+    user=st.secrets["connections"]["zambia_osp"]["username"],
+    password=st.secrets["connections"]["zambia_osp"]["password"],
+    database=st.secrets["connections"]["zambia_osp"]["database"],
+    port=st.secrets["connections"]["zambia_osp"]["port"],
+    ssl_ca=st.secrets["connections"]["gncz_dbms"]["ssl_ca"]
+)
+# conn2 = st.connection("zambia_osp", type="sql", connect_args={
+#     "ssl": {
+#         "ca": st.secrets["connections"]["gncz_dbms"]["ssl_ca"],
+#     }
+# })
 
 #df = conn1.query("SELECT * FROM gncz_dbms.indextbl AS a INNER JOIN gncz_dbms.assignprogramtbl AS b ON a.IndexID=b.IndexID INNER JOIN gncz_dbms.coursetbl AS c ON b.CourseID = c.CourseID INNER JOIN gncz_dbms.traininginstitutiontbl AS d ON b.InstitutionID = d.InstitutionID")
 # df = conn1.query("SELECT * FROM gncz_dbms.indextbl AS a INNER JOIN gncz_dbms.assignprogramtbl AS b ON a.IndexID=b.IndexID INNER JOIN gncz_dbms.coursetbl AS c ON b.CourseID = c.CourseID INNER JOIN gncz_dbms.traininginstitutiontbl AS d ON b.InstitutionID = d.InstitutionID inner join gncz_dbms.districttbl e on d.DistrictID=e.DistrictID inner join gncz_dbms.provincetbl as f on e.ProvinceID=f.ProvinceID", ttl=604800)
