@@ -19,11 +19,20 @@ st.title(" :bar_chart: Nursing and Midwife Council of Zambia Dashboard")
 st.markdown('<style>div.block-container{padding-top:1rem;padding-bottom:1rem;}</style>', unsafe_allow_html=True)
 
 # # Initialize connection.
-conn1 = st.connection("gncz_dbms", type="sql", connect_args={
-    "ssl": {
-        "ca": st.secrets["connections"]["gncz_dbms"]["ssl_ca"]
-    }
-})
+# conn1 = st.connection("gncz_dbms", type="sql", connect_args={
+#    "ssl": {
+#        "ca": st.secrets["connections"]["gncz_dbms"]["ssl_ca"]
+#    }
+#})
+
+conn1 = mysql.connector.connect(
+    host=st.secrets["connections"]["gncz_dbms"]["host"],
+    user=st.secrets["connections"]["gncz_dbms"]["username"],
+    password=st.secrets["connections"]["gncz_dbms"]["password"],
+    database=st.secrets["connections"]["gncz_dbms"]["database"],
+    port=st.secrets["connections"]["gncz_dbms"]["port"],
+    ssl_ca=st.secrets["connections"]["gncz_dbms"]["ssl_ca"]
+)
 
 conn2 = st.connection("zambia_osp", type="sql", connect_args={
     "ssl": {
