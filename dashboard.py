@@ -25,6 +25,8 @@ st.markdown('<style>div.block-container{padding-top:1rem;padding-bottom:1rem;}</
 #    }
 #})
 
+cache = dc.Cache("cache")
+
 conn1 = mysql.connector.connect(
     host=st.secrets["connections"]["gncz_dbms"]["host"],
     user=st.secrets["connections"]["gncz_dbms"]["username"],
@@ -53,17 +55,47 @@ conn2 = mysql.connector.connect(
 #df2 = conn1.query("select a.IndexID, a.DateOfBirth,  a.Gender, b.AssignProgramID, e.CourseDesc, c.RegistrationDate, d.WorkStationID, d.LicenseYear, d.FromDate, d.ToDate  from gncz_dbms.indextbl as a inner join gncz_dbms.assignprogramtbl as b  inner join gncz_dbms.registrationtbl c on b.AssignProgramID = c.AssignProgramID inner join gncz_dbms.retentiontbl as d on c.RegistrationID = d.RegistrationID inner join gncz_dbms.coursetbl as e on b.CourseID = e.CourseID", ttl=604800)
 # df3 = conn1.query("select a.WorkStationName, a.WorkStationID, b.DistrictDesc, c.ProvinceDesc, d.FacilityAgent from gncz_dbms.workstationstbl as a inner join gncz_dbms.districttbl as b on a.DistrictID = b.DistrictID inner join gncz_dbms.provincetbl as c on b.ProvinceID = c.ProvinceID inner join gncz_dbms.facilityagenttbl as d on a.FacilityAgentID = d.FacilityAgentID", ttl=604800)
 
-df0 = conn1.query("select IndexID, DateOfBirth, Gender from gncz_dbms.indextbl", ttl=604800)
-df00 = conn1.query("select IndexID, AssignProgramID, InstitutionID, CourseID, CommenceDate, CompletionDate from gncz_dbms.assignprogramtbl", ttl=604800)
-df01 = conn1.query("select ProvinceID, ProvinceDesc from gncz_dbms.provincetbl", ttl=604800)
-df02 = conn1.query("select DistrictID, DistrictDesc, ProvinceID from gncz_dbms.districttbl;", ttl=604800)
-df03 = conn1.query("select WorkStationID, WorkStationName, DistrictID from gncz_dbms.workstationstbl", ttl=604800)
-df04= conn1.query("select InstitutionID, InstitutionName, DistrictID from gncz_dbms.traininginstitutiontbl", ttl=604800)
-df05 = conn1.query("select CourseID, CourseDesc, CourseDuration from gncz_dbms.coursetbl",  ttl=604800)
-df06 = conn1.query("select RegistrationID, WorkStationID, LicenseYear, FromDate, ToDate from gncz_dbms.retentiontbl where VerificationStatus='A'", ttl=604800)
-df07 = conn1.query("select RegistrationID, AssignProgramID, RegistrationDate from gncz_dbms.registrationtbl", ttl= 604800)
+# df0 = conn1.query("select IndexID, DateOfBirth, Gender from gncz_dbms.indextbl", ttl=604800)
+# df00 = conn1.query("select IndexID, AssignProgramID, InstitutionID, CourseID, CommenceDate, CompletionDate from gncz_dbms.assignprogramtbl", ttl=604800)
+# df01 = conn1.query("select ProvinceID, ProvinceDesc from gncz_dbms.provincetbl", ttl=604800)
+# df02 = conn1.query("select DistrictID, DistrictDesc, ProvinceID from gncz_dbms.districttbl;", ttl=604800)
+# df03 = conn1.query("select WorkStationID, WorkStationName, DistrictID from gncz_dbms.workstationstbl", ttl=604800)
+# df04= conn1.query("select InstitutionID, InstitutionName, DistrictID from gncz_dbms.traininginstitutiontbl", ttl=604800)
+# df05 = conn1.query("select CourseID, CourseDesc, CourseDuration from gncz_dbms.coursetbl",  ttl=604800)
+# df06 = conn1.query("select RegistrationID, WorkStationID, LicenseYear, FromDate, ToDate from gncz_dbms.retentiontbl where VerificationStatus='A'", ttl=604800)
+# df07 = conn1.query("select RegistrationID, AssignProgramID, RegistrationDate from gncz_dbms.registrationtbl", ttl= 604800)
 df08 = pd.read_csv('mfl.csv',  delimiter=';')
 
+
+def fetch_from_cache_or_db(query, cache_key, ttl=86400):
+    # Try to get the data from cache
+    cached_data = cache.get(cache_key)
+    if cached_data is not None:
+        return pd.DataFrame(cached_data)
+    
+    # If not cached, query the database
+    cursor = conn1.cursor(dictionary=True)
+    cursor.execute(query)
+    result = cursor.fetchall()
+    cursor.close()
+    
+    # Cache the result
+    cache.set(cache_key, result, expire=ttl)
+    return pd.DataFrame(result)
+
+# Queries with caching
+df0 = fetch_from_cache_or_db("SELECT IndexID, DateOfBirth, Gender FROM gncz_dbms.indextbl", "df0")
+df00 = fetch_from_cache_or_db("SELECT IndexID, AssignProgramID, InstitutionID, CourseID, CommenceDate, CompletionDate FROM gncz_dbms.assignprogramtbl", "df00")
+df01 = fetch_from_cache_or_db("SELECT ProvinceID, ProvinceDesc FROM gncz_dbms.provincetbl", "df01")
+df02 = fetch_from_cache_or_db("SELECT DistrictID, DistrictDesc, ProvinceID FROM gncz_dbms.districttbl;", "df02")
+df03 = fetch_from_cache_or_db("SELECT WorkStationID, WorkStationName, DistrictID FROM gncz_dbms.workstationstbl", "df03")
+df04 = fetch_from_cache_or_db("SELECT InstitutionID, InstitutionName, DistrictID FROM gncz_dbms.traininginstitutiontbl", "df04")
+df05 = fetch_from_cache_or_db("SELECT CourseID, CourseDesc, CourseDuration FROM gncz_dbms.coursetbl", "df05")
+df06 = fetch_from_cache_or_db("SELECT RegistrationID, WorkStationID, LicenseYear, FromDate, ToDate FROM gncz_dbms.retentiontbl WHERE VerificationStatus='A'", "df06")
+df07 = fetch_from_cache_or_db("SELECT RegistrationID, AssignProgramID, RegistrationDate FROM gncz_dbms.registrationtbl", "df07")
+
+# Close the connection
+conn1.close()
 
 df06['ToDate'] = pd.to_datetime(df06['ToDate'])
 df07['RegistrationDate'] = pd.to_datetime(df07['RegistrationDate'])
