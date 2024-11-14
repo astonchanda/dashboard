@@ -15,6 +15,7 @@ warnings.filterwarnings("ignore")
 
 st.set_page_config(page_title="NMCZ Dashboard", page_icon=":bar_chart:", layout="wide")
 
+st.markdown("<br><br>", unsafe_allow_html=True)
 st.title(" :bar_chart: Nursing and Midwife Council of Zambia Dashboard")
 
 st.markdown('<style>div.block-container{padding-top:1rem;padding-bottom:1rem;}</style>', unsafe_allow_html=True)
