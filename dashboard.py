@@ -1,6 +1,6 @@
 from datetime import datetime
 from tempfile import template
-import mysql
+import mysql.connector
 import streamlit as st
 import pandas as pd
 import plotly.express as px
