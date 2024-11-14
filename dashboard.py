@@ -50,9 +50,9 @@ conn2 = mysql.connector.connect(
 #     }
 # })
 
-#df = conn1.query("SELECT * FROM gncz_dbms.indextbl AS a INNER JOIN gncz_dbms.assignprogramtbl AS b ON a.IndexID=b.IndexID INNER JOIN gncz_dbms.coursetbl AS c ON b.CourseID = c.CourseID INNER JOIN gncz_dbms.traininginstitutiontbl AS d ON b.InstitutionID = d.InstitutionID")
+# df = conn1.query("SELECT * FROM gncz_dbms.indextbl AS a INNER JOIN gncz_dbms.assignprogramtbl AS b ON a.IndexID=b.IndexID INNER JOIN gncz_dbms.coursetbl AS c ON b.CourseID = c.CourseID INNER JOIN gncz_dbms.traininginstitutiontbl AS d ON b.InstitutionID = d.InstitutionID")
 # df = conn1.query("SELECT * FROM gncz_dbms.indextbl AS a INNER JOIN gncz_dbms.assignprogramtbl AS b ON a.IndexID=b.IndexID INNER JOIN gncz_dbms.coursetbl AS c ON b.CourseID = c.CourseID INNER JOIN gncz_dbms.traininginstitutiontbl AS d ON b.InstitutionID = d.InstitutionID inner join gncz_dbms.districttbl e on d.DistrictID=e.DistrictID inner join gncz_dbms.provincetbl as f on e.ProvinceID=f.ProvinceID", ttl=604800)
-#df2 = conn1.query("select a.IndexID, a.DateOfBirth,  a.Gender, b.AssignProgramID, e.CourseDesc, c.RegistrationDate, d.WorkStationID, d.LicenseYear, d.FromDate, d.ToDate  from gncz_dbms.indextbl as a inner join gncz_dbms.assignprogramtbl as b  inner join gncz_dbms.registrationtbl c on b.AssignProgramID = c.AssignProgramID inner join gncz_dbms.retentiontbl as d on c.RegistrationID = d.RegistrationID inner join gncz_dbms.coursetbl as e on b.CourseID = e.CourseID", ttl=604800)
+# df2 = conn1.query("select a.IndexID, a.DateOfBirth,  a.Gender, b.AssignProgramID, e.CourseDesc, c.RegistrationDate, d.WorkStationID, d.LicenseYear, d.FromDate, d.ToDate  from gncz_dbms.indextbl as a inner join gncz_dbms.assignprogramtbl as b  inner join gncz_dbms.registrationtbl c on b.AssignProgramID = c.AssignProgramID inner join gncz_dbms.retentiontbl as d on c.RegistrationID = d.RegistrationID inner join gncz_dbms.coursetbl as e on b.CourseID = e.CourseID", ttl=604800)
 # df3 = conn1.query("select a.WorkStationName, a.WorkStationID, b.DistrictDesc, c.ProvinceDesc, d.FacilityAgent from gncz_dbms.workstationstbl as a inner join gncz_dbms.districttbl as b on a.DistrictID = b.DistrictID inner join gncz_dbms.provincetbl as c on b.ProvinceID = c.ProvinceID inner join gncz_dbms.facilityagenttbl as d on a.FacilityAgentID = d.FacilityAgentID", ttl=604800)
 
 # df0 = conn1.query("select IndexID, DateOfBirth, Gender from gncz_dbms.indextbl", ttl=604800)
@@ -73,17 +73,14 @@ def fetch_from_cache_or_db(query, cache_key, ttl=86400):
     if cached_data is not None:
         return pd.DataFrame(cached_data)
     
-    # If not cached, query the database
     cursor = conn1.cursor(dictionary=True)
     cursor.execute(query)
     result = cursor.fetchall()
     cursor.close()
     
-    # Cache the result
     cache.set(cache_key, result, expire=ttl)
     return pd.DataFrame(result)
 
-# Queries with caching
 df0 = fetch_from_cache_or_db("SELECT IndexID, DateOfBirth, Gender FROM gncz_dbms.indextbl", "df0")
 df00 = fetch_from_cache_or_db("SELECT IndexID, AssignProgramID, InstitutionID, CourseID, CommenceDate, CompletionDate FROM gncz_dbms.assignprogramtbl", "df00")
 df01 = fetch_from_cache_or_db("SELECT ProvinceID, ProvinceDesc FROM gncz_dbms.provincetbl", "df01")
@@ -94,7 +91,6 @@ df05 = fetch_from_cache_or_db("SELECT CourseID, CourseDesc, CourseDuration FROM 
 df06 = fetch_from_cache_or_db("SELECT RegistrationID, WorkStationID, LicenseYear, FromDate, ToDate FROM gncz_dbms.retentiontbl WHERE VerificationStatus='A'", "df06")
 df07 = fetch_from_cache_or_db("SELECT RegistrationID, AssignProgramID, RegistrationDate FROM gncz_dbms.registrationtbl", "df07")
 
-# Close the connection
 conn1.close()
 
 df06['ToDate'] = pd.to_datetime(df06['ToDate'])
