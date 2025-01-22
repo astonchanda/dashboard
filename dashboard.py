@@ -91,7 +91,7 @@ df03 = fetch_from_cache_or_db("SELECT WorkStationID, WorkStationName, DistrictID
 df04 = fetch_from_cache_or_db("SELECT InstitutionID, InstitutionName, DistrictID FROM gncz_dbms.traininginstitutiontbl", "df04")
 df05 = fetch_from_cache_or_db("SELECT CourseID, CourseDesc, CourseDuration FROM gncz_dbms.coursetbl", "df05")
 df06 = fetch_from_cache_or_db("SELECT RegistrationID, WorkStationID, LicenseYear, FromDate, ToDate FROM gncz_dbms.retentiontbl WHERE VerificationStatus='A'", "df06")
-df07 = fetch_from_cache_or_db("SELECT RegistrationID, AssignProgramID, RegistrationDate FROM gncz_dbms.registrationtbl", "df07")
+df07 = fetch_from_cache_or_db("SELECT RegistrationID, AssignProgramID, RegistrationDate FROM gncz_dbms.registrationtbl where RegistrationNo IS NOT NULL", "df07")
 
 conn1.close()
 
